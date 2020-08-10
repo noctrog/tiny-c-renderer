@@ -22,7 +22,7 @@ int main(int argc, char *argv[])
             struct vec3f *v0 = renderer_model_face_vec(m, i, j);
             struct vec3f *v1 = renderer_model_face_vec(m, i, (j+1)%3);
 
-            /*if (v0 == NULL || v1 == NULL) continue;*/
+            if (v0 == NULL || v1 == NULL) continue;
 
             /*Resize to fill image*/
             int x0 = (v0->x + 1.0f) * width / 2.0f;
@@ -36,5 +36,7 @@ int main(int argc, char *argv[])
 
     renderer_image_save(img, "media/lesson-1.png");
     renderer_image_delete(&img);
+
+    renderer_model_delete(&m);
     return 0;
 }

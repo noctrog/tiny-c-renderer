@@ -29,6 +29,9 @@ renderer_model_create(const char *filename)
     /*Allocate initial space for the model representation*/
     struct model* model = malloc(sizeof(struct model));
     if (!model) return NULL;
+    model->n_verts = 0;
+    model->n_faces = 0;
+
     int res_verts = 16, res_faces = 16;     /* Initial reserved verts/faces */
     model->verts = malloc(sizeof(struct vec3f) * res_verts);
     if (!model->verts) {free(model); return NULL;}  /* Could not allocate */
@@ -36,7 +39,7 @@ renderer_model_create(const char *filename)
     if (!model->faces) {free(model->verts); free(model); return NULL;}  /* Could not allocate */
 
     FILE *f = fopen(filename, "r");
-    char *line;
+    char *line = NULL;
     ssize_t linelen = 0;
     size_t linecap = 0;
     while((linelen = getline(&line, &linecap, f)) != -1) {
@@ -103,6 +106,9 @@ renderer_model_create(const char *filename)
     model->verts = realloc(model->verts, sizeof(struct vec3f) * model->n_verts);
     model->faces = realloc(model->faces, sizeof(struct face) * model->n_faces);
 
+    free(line);
+    fclose(f);
+
     return model;
 }
 
@@ -110,6 +116,7 @@ void
 renderer_model_delete(struct model **model)
 {
     free((*model)->verts);
+    free((*model)->faces);
     free(*model);
 
     *model = NULL;
