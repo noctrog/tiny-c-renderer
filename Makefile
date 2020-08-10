@@ -6,8 +6,8 @@ OBJ=obj
 BIN=bin
 
 CC=cc
-CFLAGS=-std=c99 -O2 -I$(INCLUDE)
-LFLAGS=
+CFLAGS=-std=c99 -O2 -I$(INCLUDE) -Wall -g
+LFLAGS= -lm
 
 SRC_FILES=$(wildcard $(SRC)/*.c)
 OBJ_FILES=$(addprefix $(OBJ)/,$(notdir $(SRC_FILES:.c=.o)))
