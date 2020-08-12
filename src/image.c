@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include <image.h>
+#include <geometry.h>
 
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
@@ -10,7 +11,8 @@ struct image {
     unsigned char* data;
 };
 
-static inline void int_swap(int *a, int *b)
+static inline void 
+int_swap(int *a, int *b)
 {
     *a = *a ^ *b;
     *b = *b ^ *a;
@@ -86,6 +88,23 @@ renderer_image_draw_line(struct image *img, struct color *col, int x0, int y0, i
             renderer_image_set_pixel(img, col, y, x);
         } else {
             renderer_image_set_pixel(img, col, x, y);
+        }
+    }
+}
+
+void
+renderer_image_draw_triangle(struct image *img, struct color *col, gm_triangle *tr)
+{
+    if (!img || !col || !tr) return;
+
+    struct bbox bb = renderer_geometry_triangle_bounding_box(tr);
+    if (bb.x == -1 || bb.y == -1 || bb.w == -1 || bb.h == -1) return;
+
+    int num_pixels = bb.h * bb.w, j;
+    for (j = 0; j < num_pixels; ++j) {
+        struct vec2i p = {.x = bb.x + j % bb.w, .y = bb.y + j / bb.w};
+        if (renderer_geometry_pixel_in_triangle(tr, &p)) {
+            renderer_image_set_pixel(img, col, p.x, p.y);
         }
     }
 }

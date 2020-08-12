@@ -17,24 +17,41 @@ int main(int argc, char *argv[])
     int i, nfaces;
     nfaces = renderer_model_nfaces(m);
     for (i = 0; i < nfaces; ++i) {
+        gm_triangle tr;
+        struct vec3f *u[3];
+        struct color col;
+
+        /* Construct triangle*/
         int j;
         for (j = 0; j < 3; ++j) {
-            struct vec3f *v0 = renderer_model_face_vec(m, i, j);
-            struct vec3f *v1 = renderer_model_face_vec(m, i, (j+1)%3);
+            u[j] = renderer_model_face_vec(m, i, j);
 
-            if (v0 == NULL || v1 == NULL) continue;
+            if (u[j] == NULL) continue;
 
             /*Resize to fill image*/
-            int x0 = (v0->x + 1.0f) * width / 2.0f;
-            int x1 = (v1->x + 1.0f) * width / 2.0f;
-            int y0 = (v0->y + 1.0f) * height / 2.0f;
-            int y1 = (v1->y + 1.0f) * height / 2.0f;
+            int x = (u[j]->x + 1.0f) * width / 2.0f;
+            int y = (u[j]->y + 1.0f) * height / 2.0f;
+            
+            tr[j].x = x;
+            tr[j].y = y;
+        }
 
-            renderer_image_draw_line(img, &white, x0, y0, x1, y1);
+        /* Compute normal */
+        struct vec3f u1 = {.x = u[1]->x - u[0]->x, .y = u[1]->y - u[0]->y, .z = u[1]->z - u[0]->z };
+        struct vec3f u2 = {.x = u[2]->x - u[1]->x, .y = u[2]->y - u[1]->y, .z = u[2]->z - u[1]->z };
+        struct vec3f n  = renderer_geometry_cross(&u1, &u2);
+        renderer_geometry_normalize(&n);
+        float intensity = (n.z) / 3.0f;
+        if (intensity > 0.0f) {
+            col.r = abs((int)(intensity * 255));
+            col.g = abs((int)(intensity * 255));
+            col.b = abs((int)(intensity * 255));
+
+            renderer_image_draw_triangle(img, &col, &tr);
         }
     }
 
-    renderer_image_save(img, "media/lesson-1.png");
+    renderer_image_save(img, "media/lesson-2.png");
     renderer_image_delete(&img);
 
     renderer_model_delete(&m);
