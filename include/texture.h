@@ -7,18 +7,18 @@
 struct texture;
 
 struct texture *
-renderer_texture_create(const char *filename);
+rndr_texture_create(const char *filename);
 
 void
-renderer_texture_delete(struct texture **tex);
+rndr_texture_delete(struct texture **tex);
 
 struct color *
-renderer_texture_get_color(struct texture *tex, struct vec2i *p);
+rndr_texture_get_color(struct texture *tex, struct vec2i *p);
 
 int
-renderer_texture_get_width(struct texture *tex);
+rndr_texture_get_width(struct texture *tex);
 
 int
-renderer_texture_get_height(struct texture *tex);
+rndr_texture_get_height(struct texture *tex);
 
 #endif /* end of include guard: TEXTURE_H_16JPB9UM */

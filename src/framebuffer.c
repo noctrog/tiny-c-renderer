@@ -21,7 +21,7 @@ int_swap(int *a, int *b)
 }
 
 struct framebuffer* 
-renderer_framebuffer_create(int x, int y)
+rndr_framebuffer_create(int x, int y)
 {
     if (x <= 0 || y <= 0) return NULL;
 
@@ -50,7 +50,7 @@ renderer_framebuffer_create(int x, int y)
 }
 
 void
-renderer_framebuffer_delete(struct framebuffer **fb)
+rndr_framebuffer_delete(struct framebuffer **fb)
 {
     if ((*fb)->color)       free((*fb)->color);
     if ((*fb)->z_buffer)    free((*fb)->z_buffer);
@@ -59,7 +59,7 @@ renderer_framebuffer_delete(struct framebuffer **fb)
 }
 
 void
-renderer_framebuffer_set_pixel(struct framebuffer *fb, const struct color *col,
+rndr_framebuffer_set_pixel(struct framebuffer *fb, const struct color *col,
                                const struct vec2i *p)
 {
     if (!fb || !col || !p) return;
@@ -74,7 +74,7 @@ renderer_framebuffer_set_pixel(struct framebuffer *fb, const struct color *col,
 }
 
 void
-renderer_framebuffer_set_pixel_z(struct framebuffer *fb, int zval, const struct vec2i *p)
+rndr_framebuffer_set_pixel_z(struct framebuffer *fb, int zval, const struct vec2i *p)
 {
     if (!fb || !p || p->x < 0 || p->y < 0 || p->x >= fb->x || p->y >= fb->y) return;
 
@@ -84,7 +84,7 @@ renderer_framebuffer_set_pixel_z(struct framebuffer *fb, int zval, const struct 
 }
 
 float
-renderer_framebuffer_get_pixel_z(const struct framebuffer *fb, const struct vec2i *p)
+rndr_framebuffer_get_pixel_z(const struct framebuffer *fb, const struct vec2i *p)
 {
     if (!fb || !p || p->x < 0 || p->y < 0 || p->x >= fb->x || p->y >= fb->y) return -10.0f;
 
@@ -93,7 +93,7 @@ renderer_framebuffer_get_pixel_z(const struct framebuffer *fb, const struct vec2
 }
 
 void
-renderer_framebuffer_draw_line(struct framebuffer *fb, struct color *col, 
+rndr_framebuffer_draw_line(struct framebuffer *fb, struct color *col, 
                                struct vec2i *p0, struct vec2i *p1)
 {
     /*Check pointers*/
@@ -122,23 +122,24 @@ renderer_framebuffer_draw_line(struct framebuffer *fb, struct color *col,
         float t = (p.x - p0->x) / (float)(p1->x - p0->x);
         p.y = p0->y + t * (p1->y - p0->y);
         if (bSteep) {
-            renderer_framebuffer_set_pixel(fb, col, &p);
+            rndr_framebuffer_set_pixel(fb, col, &p);
         } else {
-            renderer_framebuffer_set_pixel(fb, col, &p);
+            rndr_framebuffer_set_pixel(fb, col, &p);
         }
     }
 }
 
 void
-renderer_framebuffer_draw_triangle(struct framebuffer *fb, 
+rndr_framebuffer_draw_triangle(struct framebuffer *fb, 
                                    const gm_triangle *tr, 
                                    struct vec3f **u,
                                    struct vec2f **uv,
+                                   struct vec3f **vn,
                                    struct texture *tex)
 {
     if (!fb || !tr || !u || !uv || !tex) return;
 
-    struct bbox bb = renderer_geometry_triangle_bounding_box(tr);
+    struct bbox bb = rndr_geometry_triangle_bounding_box(tr);
     if (bb.x == -1 || bb.y == -1 || bb.w == -1 || bb.h == -1) return;
 
     int num_pixels = bb.h * bb.w, j;
@@ -146,18 +147,20 @@ renderer_framebuffer_draw_triangle(struct framebuffer *fb,
         struct vec2i p = {.x = bb.x + j % bb.w, .y = bb.y + j / bb.w};
 
         /* Compute barycentric coordinates */
-        struct vec3f bc = renderer_geometry_barycentric_coords(tr, &p);
+        struct vec3f bc = rndr_geometry_barycentric_coords(tr, &p);
 
-        if (renderer_geometry_pixel_in_triangle(tr, &p)) {
+        if (rndr_geometry_pixel_in_triangle(tr, &p)) {
             /* Compute z value */
             float z_val = 0.0f;
             z_val += (u[0])->z * bc.x;
             z_val += (u[1])->z * bc.y;
             z_val += (u[2])->z * bc.z;
 
-            if (renderer_framebuffer_get_pixel_z(fb, &p) > z_val) {
-                struct vec3f n = renderer_geometry_triangle_normal(u);
-                float intensity = (n.z);
+            if (rndr_framebuffer_get_pixel_z(fb, &p) > z_val) {
+                /* struct vec3f n = rndr_geometry_triangle_normal(u); */
+                /* float intensity = n.z; */
+                struct vec3f i = {.x = (*vn[0]).z, .y = (*vn[1]).z, .z = (*vn[2]).z};
+                float intensity = i.x * bc.x + i.y * bc.y + i.z * bc.z;
                 if (intensity > 0.0f) {
                     /* Compute texture coordinates */
                     struct vec2f tc = {
@@ -166,11 +169,11 @@ renderer_framebuffer_draw_triangle(struct framebuffer *fb,
                     };
                     /* Calculate texture pixel */
                     struct vec2i tci = {
-                        .x = tc.x * renderer_texture_get_width(tex),
-                        .y = tc.y * renderer_texture_get_height(tex)
+                        .x = tc.x * rndr_texture_get_width(tex),
+                        .y = tc.y * rndr_texture_get_height(tex)
                     };
                     /* Retrieve color */
-                    struct color *c = renderer_texture_get_color(tex, &tci);
+                    struct color *c = rndr_texture_get_color(tex, &tci);
                     if (!c) continue;
 
                     c->r *= intensity;
@@ -180,8 +183,8 @@ renderer_framebuffer_draw_triangle(struct framebuffer *fb,
                     /* c->g = fabs(intensity) * 255; */
                     /* c->b = fabs(intensity) * 255; */
 
-                    renderer_framebuffer_set_pixel_z(fb, z_val, &p);
-                    renderer_framebuffer_set_pixel(fb, c, &p);
+                    rndr_framebuffer_set_pixel_z(fb, z_val, &p);
+                    rndr_framebuffer_set_pixel(fb, c, &p);
                 }
             }
         }
@@ -189,7 +192,7 @@ renderer_framebuffer_draw_triangle(struct framebuffer *fb,
 }
 
 void
-renderer_framebuffer_clear_color(struct framebuffer *fb, const struct color *col)
+rndr_framebuffer_clear_color(struct framebuffer *fb, const struct color *col)
 {
     if (!fb || !col) return;
 
@@ -202,7 +205,7 @@ renderer_framebuffer_clear_color(struct framebuffer *fb, const struct color *col
 }
 
 void
-renderer_framebuffer_clear_z(struct framebuffer *fb)
+rndr_framebuffer_clear_z(struct framebuffer *fb)
 {
     if (!fb || !fb->z_buffer) return;
 
@@ -213,7 +216,7 @@ renderer_framebuffer_clear_z(struct framebuffer *fb)
 }
 
 int 
-renderer_framebuffer_save(struct framebuffer *fb, char *filename)
+rndr_framebuffer_save(struct framebuffer *fb, char *filename)
 {
     if (!filename || !fb) return -1;
     if (stbi_write_png(filename, fb->x, fb->y, 3, fb->color, 0))

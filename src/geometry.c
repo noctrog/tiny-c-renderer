@@ -3,7 +3,7 @@
 #include <geometry.h>
 
 float
-renderer_geometry_dot(const struct vec3f *v1, const struct vec3f *v2)
+rndr_geometry_dot(const struct vec3f *v1, const struct vec3f *v2)
 {
     if (!v1 || !v2) return 0.0f;
 
@@ -11,7 +11,7 @@ renderer_geometry_dot(const struct vec3f *v1, const struct vec3f *v2)
 }
 
 struct vec3f
-renderer_geometry_cross(const struct vec3f *v1, const struct vec3f *v2)
+rndr_geometry_cross(const struct vec3f *v1, const struct vec3f *v2)
 {
     struct vec3f v = {.x = 0.0f, .y = 0.0f, .z = 0.0f};
 
@@ -25,7 +25,7 @@ renderer_geometry_cross(const struct vec3f *v1, const struct vec3f *v2)
 }
 
 void
-renderer_geometry_normalize(struct vec3f *v)
+rndr_geometry_normalize(struct vec3f *v)
 {
     if (!v) return;
 
@@ -36,7 +36,7 @@ renderer_geometry_normalize(struct vec3f *v)
 }
 
 struct bbox 
-renderer_geometry_triangle_bounding_box(const gm_triangle* tr)
+rndr_geometry_triangle_bounding_box(const gm_triangle* tr)
 {
     struct bbox bb = {.x = -1, .y = -1, .w = -1, .h = -1};
 
@@ -61,14 +61,14 @@ renderer_geometry_triangle_bounding_box(const gm_triangle* tr)
 }
 
 struct vec3f
-renderer_geometry_barycentric_coords(const gm_triangle *tr, const struct vec2i *p)
+rndr_geometry_barycentric_coords(const gm_triangle *tr, const struct vec2i *p)
 {
     struct vec3f c = {.x = -1.0f, .y = -1.0f, .z = -1.0f};
     if (!tr || !p) return c;
 
     struct vec3f v1 = {.x = (*tr)[2].x - (*tr)[0].x, .y = (*tr)[1].x - (*tr)[0].x, .z = (*tr)[0].x - p->x};
     struct vec3f v2 = {.x = (*tr)[2].y - (*tr)[0].y, .y = (*tr)[1].y - (*tr)[0].y, .z = (*tr)[0].y - p->y};
-    c = renderer_geometry_cross(&v1, &v2);
+    c = rndr_geometry_cross(&v1, &v2);
 
     /* If the triangle is degenerate, c.z will be 0 */
     if (fabs(c.z) < 1.0f) {
@@ -85,11 +85,11 @@ renderer_geometry_barycentric_coords(const gm_triangle *tr, const struct vec2i *
 
 /*Returns 1 if point is inside the triangle, 0 if not*/
 int
-renderer_geometry_pixel_in_triangle(const gm_triangle *tr, const struct vec2i *p)
+rndr_geometry_pixel_in_triangle(const gm_triangle *tr, const struct vec2i *p)
 {
     if (!tr || !p) return 0;
 
-    struct vec3f c = renderer_geometry_barycentric_coords(tr, p);
+    struct vec3f c = rndr_geometry_barycentric_coords(tr, p);
 
     if (c.x < 0.0f || c.y < 0.0f || c.z < 0.0f)
         return 0;
@@ -98,7 +98,7 @@ renderer_geometry_pixel_in_triangle(const gm_triangle *tr, const struct vec2i *p
 }
 
 struct vec3f
-renderer_geometry_triangle_normal(struct vec3f **u)
+rndr_geometry_triangle_normal(struct vec3f **u)
 {
     struct vec3f n = {.x = 0.0f, .y = 0.0f, .z = 0.0f};
     if (!u || !*u) return n;
@@ -110,8 +110,8 @@ renderer_geometry_triangle_normal(struct vec3f **u)
     struct vec3f u2 = {.x = u[2]->x - u[0]->x,
         .y = u[2]->y - u[0]->y,
         .z = u[2]->z - u[0]->z };
-    n = renderer_geometry_cross(&u1, &u2);
-    renderer_geometry_normalize(&n);
+    n = rndr_geometry_cross(&u1, &u2);
+    rndr_geometry_normalize(&n);
 
     return n;
 }

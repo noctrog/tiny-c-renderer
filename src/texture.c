@@ -12,7 +12,7 @@ struct texture {
 };
 
 struct texture *
-renderer_texture_create(const char *filename)
+rndr_texture_create(const char *filename)
 {
     if (!filename) return NULL;
 
@@ -28,7 +28,7 @@ renderer_texture_create(const char *filename)
 }
 
 void
-renderer_texture_delete(struct texture **tex)
+rndr_texture_delete(struct texture **tex)
 {
     if (!tex) return;
     if ((*tex)->color) free((*tex)->color);
@@ -38,7 +38,7 @@ renderer_texture_delete(struct texture **tex)
 
 
 struct color *
-renderer_texture_get_color(struct texture *tex, struct vec2i *p)
+rndr_texture_get_color(struct texture *tex, struct vec2i *p)
 {
     if (!tex || !p) return NULL;
     if (p->x < 0 || p->y < 0 || p->x >= tex->x || p->y >= tex->y) return NULL;
@@ -49,14 +49,14 @@ renderer_texture_get_color(struct texture *tex, struct vec2i *p)
 }
 
 int
-renderer_texture_get_width(struct texture *tex)
+rndr_texture_get_width(struct texture *tex)
 {
     if (!tex) return -1;
     return tex->x;
 }
 
 int
-renderer_texture_get_height(struct texture *tex)
+rndr_texture_get_height(struct texture *tex)
 {
     if (!tex) return -1;
     return tex->y;
