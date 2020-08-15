@@ -1,6 +1,10 @@
 #ifndef GEOMETRY_H_HGQZ875L
 #define GEOMETRY_H_HGQZ875L
 
+struct vec2f {
+    float x, y;
+};
+
 struct vec3f {
     float x, y, z;
 };
@@ -36,8 +40,15 @@ renderer_geometry_normalize(struct vec3f *v);
 struct bbox
 renderer_geometry_triangle_bounding_box(const gm_triangle *tr);
 
+struct vec3f
+renderer_geometry_barycentric_coords(const gm_triangle *tr, const struct vec2i *p);
+
 /*Check if pixel is inside a triangle*/
 int
 renderer_geometry_pixel_in_triangle(const gm_triangle *tr, const struct vec2i *p);
+
+// Calculate normal of a triangle
+struct vec3f
+renderer_geometry_triangle_normal(struct vec3f **u);
 
 #endif /* end of include guard: GEOMETRY_H_HGQZ875L */

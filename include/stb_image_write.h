@@ -1,5 +1,5 @@
-/* stb_image_write - v1.15 - public domain - http://nothings.org/stb
-   writes out PNG/BMP/TGA/JPEG/HDR images to C stdio - Sean Barrett 2010-2015
+/* stb_framebuffer_write - v1.15 - public domain - http://nothings.org/stb
+   writes out PNG/BMP/TGA/JPEG/HDR framebuffers to C stdio - Sean Barrett 2010-2015
                                      no warranty implied; use at your own risk
 
    Before #including,
@@ -12,13 +12,13 @@
 
 ABOUT:
 
-   This header file is a library for writing images to C stdio or a callback.
+   This header file is a library for writing framebuffers to C stdio or a callback.
 
    The PNG output is not optimal; it is 20-50% larger than the file
    written by a decent optimizing implementation; though providing a custom
    zlib compress function (see STBIW_ZLIB_COMPRESS) can mitigate that.
    This library is designed for source code compactness and simplicity,
-   not optimal image file size or run-time performance.
+   not optimal framebuffer file size or run-time performance.
 
 BUILDING:
 
@@ -42,7 +42,7 @@ UNICODE:
 
 USAGE:
 
-   There are five functions, one for each image file format:
+   There are five functions, one for each framebuffer file format:
 
      int stbi_write_png(char const *filename, int w, int h, int comp, const void *data, int stride_in_bytes);
      int stbi_write_bmp(char const *filename, int w, int h, int comp, const void *data);
@@ -76,7 +76,7 @@ USAGE:
 
    Each function returns 0 on failure and non-0 on success.
 
-   The functions create an image file defined by the parameters. The image
+   The functions create an framebuffer file defined by the parameters. The framebuffer
    is a rectangle of pixels stored from left-to-right, top-to-bottom.
    Each pixel contains 'comp' channels of data stored interleaved with 8-bits
    per channel, in the following order: 1=Y, 2=YA, 3=RGB, 4=RGBA. (Y is
@@ -90,7 +90,7 @@ USAGE:
    output alpha.
 
    PNG supports writing rectangles of data even when the bytes storing rows of
-   data are not consecutive in memory (e.g. sub-rectangles of a larger image),
+   data are not consecutive in memory (e.g. sub-rectangles of a larger framebuffer),
    by supplying the stride between the beginning of adjacent rows. The other
    formats do not. (Thus you cannot write a native-format BMP through the BMP
    writer, both because it is in BGR order and because it may have padding
@@ -107,7 +107,7 @@ USAGE:
    data, set the global variable 'stbi_write_tga_with_rle' to 0.
 
    JPEG does ignore alpha channels in input data; quality is between 1 and 100.
-   Higher quality looks better but results in a bigger image.
+   Higher quality looks better but results in a bigger framebuffer.
    JPEG baseline (no JPEG progressive).
 
 CREDITS:
@@ -343,7 +343,7 @@ static void stbi__end_write_file(stbi__write_context *s)
 #endif // !STBI_WRITE_NO_STDIO
 
 typedef unsigned int stbiw_uint32;
-typedef int stb_image_write_test[sizeof(stbiw_uint32)==4 ? 1 : -1];
+typedef int stb_framebuffer_write_test[sizeof(stbiw_uint32)==4 ? 1 : -1];
 
 static void stbiw__writefv(stbi__write_context *s, const char *fmt, va_list v)
 {
@@ -665,7 +665,7 @@ static void stbiw__write_hdr_scanline(stbi__write_context *s, int width, int nco
    scanlineheader[2] = (width&0xff00)>>8;
    scanlineheader[3] = (width&0x00ff);
 
-   /* skip RLE for images too small or large */
+   /* skip RLE for framebuffers too small or large */
    if (width < 8 || width >= 32768) {
       for (x=0; x < width; x++) {
          switch (ncomp) {
@@ -753,7 +753,7 @@ static int stbi_write_hdr_core(stbi__write_context *s, int x, int y, int comp, f
       unsigned char *scratch = (unsigned char *) STBIW_MALLOC(x*4);
       int i, len;
       char buffer[128];
-      char header[] = "#?RADIANCE\n# Written by stb_image_write.h\nFORMAT=32-bit_rle_rgbe\n";
+      char header[] = "#?RADIANCE\n# Written by stb_framebuffer_write.h\nFORMAT=32-bit_rle_rgbe\n";
       s->func(s->context, header, sizeof(header)-1);
 
 #ifdef __STDC_WANT_SECURE_LIB__
@@ -1637,7 +1637,7 @@ STBIWDEF int stbi_write_jpg(char const *filename, int x, int y, int comp, const 
       0.95 (2014-08-17)
 		       add monochrome TGA output
       0.94 (2014-05-31)
-             rename private functions to avoid conflicts with stb_image.h
+             rename private functions to avoid conflicts with stb_framebuffer.h
       0.93 (2014-05-27)
              warning fixes
       0.92 (2010-08-01)

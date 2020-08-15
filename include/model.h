@@ -24,10 +24,16 @@ renderer_model_nfaces(const struct model *model);
 struct vec3f *
 renderer_model_vert(const struct model *model, int i);
 
+struct vec2f *
+renderer_model_texcoords(const struct model *model, int i);
+
 struct face *
 renderer_model_face(const struct model *model, int i);
 
 struct vec3f *
 renderer_model_face_vec(const struct model *m, int i, int j);
+
+struct vec2f *
+renderer_model_face_uv(const struct model *m, int i, int j);
 
 #endif /* end of include guard: MODEL_H_RBWTLNK5 */
