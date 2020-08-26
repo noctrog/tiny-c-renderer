@@ -94,7 +94,7 @@ rndr_framebuffer_get_pixel_z(const struct framebuffer *fb, const struct vec2i *p
 
 void
 rndr_framebuffer_draw_line(struct framebuffer *fb, struct color *col, 
-                               struct vec2i *p0, struct vec2i *p1)
+                           struct vec2i *p0, struct vec2i *p1)
 {
     /*Check pointers*/
     if (!fb || !col || !fb->color)
@@ -131,11 +131,11 @@ rndr_framebuffer_draw_line(struct framebuffer *fb, struct color *col,
 
 void
 rndr_framebuffer_draw_triangle(struct framebuffer *fb, 
-                                   const gm_triangle *tr, 
-                                   struct vec3f **u,
-                                   struct vec2f **uv,
-                                   struct vec3f **vn,
-                                   struct texture *tex)
+                               const gm_triangle *tr, 
+                               vec3 *u[3],
+                               vec2 *uv[3],
+                               vec3 *vn[3],
+                               struct texture *tex)
 {
     if (!fb || !tr || !u || !uv || !tex) return;
 
@@ -147,30 +147,37 @@ rndr_framebuffer_draw_triangle(struct framebuffer *fb,
         struct vec2i p = {.x = bb.x + j % bb.w, .y = bb.y + j / bb.w};
 
         /* Compute barycentric coordinates */
-        struct vec3f bc = rndr_geometry_barycentric_coords(tr, &p);
+        vec3 bc; glm_vec3_zero(bc);
+        rndr_geometry_barycentric_coords(tr, &p, bc);
 
         if (rndr_geometry_pixel_in_triangle(tr, &p)) {
             /* Compute z value */
             float z_val = 0.0f;
-            z_val += (u[0])->z * bc.x;
-            z_val += (u[1])->z * bc.y;
-            z_val += (u[2])->z * bc.z;
+            z_val += (*u[0])[2] * bc[0];
+            z_val += (*u[1])[2] * bc[1];
+            z_val += (*u[2])[2] * bc[2];
 
             if (rndr_framebuffer_get_pixel_z(fb, &p) > z_val) {
-                /* struct vec3f n = rndr_geometry_triangle_normal(u); */
-                /* float intensity = n.z; */
-                struct vec3f i = {.x = (*vn[0]).z, .y = (*vn[1]).z, .z = (*vn[2]).z};
-                float intensity = i.x * bc.x + i.y * bc.y + i.z * bc.z;
+                vec3 n; glm_vec3_zero(n);
+                rndr_geometry_triangle_normal(u, n);
+                float intensity = n[2];
+
+                /***********************************************************************************************
+                 *  TODO: Las siguientes dos lineas hacen que los triangulos de los hombros
+                 *  no se rendericen bien. *
+                 ***********************************************************************************************/
+                /* struct vec3 i = {.x = (*vn[0]).z, .y = (*vn[1]).z, .z = (*vn[2]).z}; */
+                /* float intensity = i.x * bc.x + i.y * bc.y + i.z * bc.z; */
                 if (intensity > 0.0f) {
                     /* Compute texture coordinates */
-                    struct vec2f tc = {
-                        .x = (uv[0])->x * bc.x + (uv[1])->x * bc.y + (uv[2])->x * bc.z,
-                        .y = (uv[0])->y * bc.x + (uv[1])->y * bc.y + (uv[2])->y * bc.z
+                    vec2 tc = {
+                        (*uv[0])[0] * bc[0] + (*uv[1])[0] * bc[1] + (*uv[2])[0] * bc[2],
+                        (*uv[0])[1] * bc[0] + (*uv[1])[1] * bc[1] + (*uv[2])[1] * bc[2]
                     };
                     /* Calculate texture pixel */
                     struct vec2i tci = {
-                        .x = tc.x * rndr_texture_get_width(tex),
-                        .y = tc.y * rndr_texture_get_height(tex)
+                        .x = tc[0] * rndr_texture_get_width(tex),
+                        .y = tc[1] * rndr_texture_get_height(tex)
                     };
                     /* Retrieve color */
                     struct color *c = rndr_texture_get_color(tex, &tci);
@@ -218,7 +225,7 @@ rndr_framebuffer_clear_z(struct framebuffer *fb)
 int 
 rndr_framebuffer_save(struct framebuffer *fb, char *filename)
 {
-    if (!filename || !fb) return -1;
+    if (!fb || !filename) return -1;
     if (stbi_write_png(filename, fb->x, fb->y, 3, fb->color, 0))
         return -1;
 

@@ -1,13 +1,11 @@
 #ifndef GEOMETRY_H_HGQZ875L
 #define GEOMETRY_H_HGQZ875L
 
-struct vec2f {
-    float x, y;
-};
+#include <cglm/vec2.h>
+#include <cglm/vec3.h>
+#include <cglm/vec4.h>
 
-struct vec3f {
-    float x, y, z;
-};
+/* TODO: use _Generic */
 
 struct vec2i {
     int x, y;
@@ -28,31 +26,20 @@ struct bbox {
     int x, y, w, h;
 };
 
-/*Dot product*/
-float
-rndr_geometry_dot(const struct vec3f *v1, const struct vec3f *v2);
-
-/*Cross product*/
-struct vec3f
-rndr_geometry_cross(const struct vec3f *v1, const struct vec3f *v2);
-
-/*Normalize vector*/
-void
-rndr_geometry_normalize(struct vec3f *v);
-
 /*Get bounding box of triangle*/
 struct bbox
 rndr_geometry_triangle_bounding_box(const gm_triangle *tr);
 
-struct vec3f
-rndr_geometry_barycentric_coords(const gm_triangle *tr, const struct vec2i *p);
+/* Calculate barycentric coordinates */
+void
+rndr_geometry_barycentric_coords(const gm_triangle *tr, const struct vec2i *p, vec3 dest);
 
 /*Check if pixel is inside a triangle*/
 int
 rndr_geometry_pixel_in_triangle(const gm_triangle *tr, const struct vec2i *p);
 
-// Calculate normal of a triangle
-struct vec3f
-rndr_geometry_triangle_normal(struct vec3f **u);
+/* Calculate normal of a triangle */
+void
+rndr_geometry_triangle_normal(vec3 *u[3], vec3 dest);
 
 #endif /* end of include guard: GEOMETRY_H_HGQZ875L */

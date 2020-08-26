@@ -27,9 +27,9 @@ int main(int argc, char *argv[])
     nfaces = rndr_model_nfaces(m);
     for (i = 0; i < nfaces; ++i) {
         gm_triangle tr;             /* Current triangle, screen space */
-        struct vec3f *u[3];         /* Triangle 3D vertices */
-        struct vec2f *uv[3];        /* Texture coordinates */
-        struct vec3f *vn[3];        /* Normals */
+        vec3 *u[3];                  /* Triangle 3D vertices */
+        vec2 *uv[3];                 /* Texture coordinates */
+        vec3 *vn[3];                 /* Normals */
 
         /* Construct triangle */
         int j;
@@ -41,8 +41,8 @@ int main(int argc, char *argv[])
             vn[j] = rndr_model_face_vn(m, i, j);
 
             /* Resize to fill framebuffer */
-            int x = (u[j]->x + 1.0f) * width / 2.0f;
-            int y = (u[j]->y + 1.0f) * height / 2.0f;
+            int x = ((*u[j])[0] + 1.0f) * width / 2.0f;
+            int y = ((*u[j])[1] + 1.0f) * height / 2.0f;
 
             tr[j].x = x;
             tr[j].y = y;

@@ -2,38 +2,7 @@
 #include <math.h>
 #include <geometry.h>
 
-float
-rndr_geometry_dot(const struct vec3f *v1, const struct vec3f *v2)
-{
-    if (!v1 || !v2) return 0.0f;
-
-    return v1->x * v2->x + v1->y * v2->y + v1->z * v2->z;
-}
-
-struct vec3f
-rndr_geometry_cross(const struct vec3f *v1, const struct vec3f *v2)
-{
-    struct vec3f v = {.x = 0.0f, .y = 0.0f, .z = 0.0f};
-
-    if (v1 && v2) {
-        v.x = v1->y * v2->z - v1->z * v2->y;
-        v.y = v1->z * v2->x - v1->x * v2->z;
-        v.z = v1->x * v2->y - v1->y * v2->x;
-    }
-
-    return v;
-}
-
-void
-rndr_geometry_normalize(struct vec3f *v)
-{
-    if (!v) return;
-
-    float norm = sqrt(v->x * v->x + v->y * v->y + v->z * v->z);
-    v->x /= norm;
-    v->y /= norm;
-    v->z /= norm;
-}
+#include <cglm/vec3.h>
 
 struct bbox 
 rndr_geometry_triangle_bounding_box(const gm_triangle* tr)
@@ -60,27 +29,31 @@ rndr_geometry_triangle_bounding_box(const gm_triangle* tr)
     return bb;
 }
 
-struct vec3f
-rndr_geometry_barycentric_coords(const gm_triangle *tr, const struct vec2i *p)
+void
+rndr_geometry_barycentric_coords(const gm_triangle *tr, const struct vec2i *p, vec3 dest)
 {
-    struct vec3f c = {.x = -1.0f, .y = -1.0f, .z = -1.0f};
-    if (!tr || !p) return c;
-
-    struct vec3f v1 = {.x = (*tr)[2].x - (*tr)[0].x, .y = (*tr)[1].x - (*tr)[0].x, .z = (*tr)[0].x - p->x};
-    struct vec3f v2 = {.x = (*tr)[2].y - (*tr)[0].y, .y = (*tr)[1].y - (*tr)[0].y, .z = (*tr)[0].y - p->y};
-    c = rndr_geometry_cross(&v1, &v2);
-
-    /* If the triangle is degenerate, c.z will be 0 */
-    if (fabs(c.z) < 1.0f) {
-        c.x = -1.0f;
-    } else {
-        struct vec3f u = c;
-        c.x = 1.0f - (u.x + u.y) / u.z;
-        c.y = u.y / u.z;
-        c.z = u.x / u.z;
+    vec3 c = {-1.0f, -1.0f, -1.0f};
+    if (!tr || !p) {
+        glm_vec3_copy(c, dest);
     }
 
-    return c;
+    vec3 v1 = {(*tr)[2].x - (*tr)[0].x, (*tr)[1].x - (*tr)[0].x, (*tr)[0].x - p->x};
+    vec3 v2 = {(*tr)[2].y - (*tr)[0].y, (*tr)[1].y - (*tr)[0].y, (*tr)[0].y - p->y};
+
+    glm_vec3_cross(v1, v2, c);
+
+    /* If the triangle is degenerate, c.z will be 0 */
+    if (fabs(c[2]) < 1.0f) {
+        c[0] = -1.0f;
+    } else {
+        vec3 u;
+        glm_vec3_copy(c, u);
+        c[0] = 1.0f - (u[0] + u[1]) / u[2];
+        c[1] = u[1] / u[2];
+        c[2] = u[0] / u[2];
+    }
+
+    glm_vec3_copy(c, dest);
 }
 
 /*Returns 1 if point is inside the triangle, 0 if not*/
@@ -89,29 +62,28 @@ rndr_geometry_pixel_in_triangle(const gm_triangle *tr, const struct vec2i *p)
 {
     if (!tr || !p) return 0;
 
-    struct vec3f c = rndr_geometry_barycentric_coords(tr, p);
+    vec3 c;
+    rndr_geometry_barycentric_coords(tr, p, c);
 
-    if (c.x < 0.0f || c.y < 0.0f || c.z < 0.0f)
+    if (c[0] < 0.0f || c[1] < 0.0f || c[2] < 0.0f)
         return 0;
     else
         return 1;
 }
 
-struct vec3f
-rndr_geometry_triangle_normal(struct vec3f **u)
+void
+rndr_geometry_triangle_normal(vec3 *u[3], vec3 dest)
 {
-    struct vec3f n = {.x = 0.0f, .y = 0.0f, .z = 0.0f};
-    if (!u || !*u) return n;
+    vec3 n = {0.0f, 0.0f, 0.0f};
+    if (!u || !u) {
+        glm_vec3_copy(n, dest);
+        return;
+    }
 
-    /* Compute normal */
-    struct vec3f u1 = {.x = u[1]->x - u[0]->x, 
-        .y = u[1]->y - u[0]->y,
-        .z = u[1]->z - u[0]->z };
-    struct vec3f u2 = {.x = u[2]->x - u[0]->x,
-        .y = u[2]->y - u[0]->y,
-        .z = u[2]->z - u[0]->z };
-    n = rndr_geometry_cross(&u1, &u2);
-    rndr_geometry_normalize(&n);
+    /* Compute normal and normalize */
+    vec3 u1, u2;
+    glm_vec3_sub(*u[1], *u[0], u1);
+    glm_vec3_sub(*u[2], *u[0], u2);
 
-    return n;
+    glm_vec3_crossn(u1, u2, dest);
 }

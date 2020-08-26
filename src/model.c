@@ -14,13 +14,13 @@ struct face {
 };
 
 struct model {
-    struct vec3f* verts;
+    vec3* verts;
     int n_verts;
     struct face* faces;
     int n_faces;
-    struct vec2f* tc;
+    vec2* tc;
     int n_tc;
-    struct vec3f *vn;
+    vec3 *vn;
     int n_vn;
 };
 
@@ -40,7 +40,7 @@ rndr_model_create(const char *filename)
 
     int res_verts, res_faces, res_vt, res_vn;   /* Initial reserved verts/faces */
     res_verts = res_faces = res_vt = res_vn = 16;
-    model->verts = malloc(sizeof(struct vec3f) * res_verts);
+    model->verts = malloc(sizeof(vec3) * res_verts);
     if (!model->verts) { /* Could not allocate */
         rndr_model_delete(&model);
         return NULL;
@@ -50,12 +50,12 @@ rndr_model_create(const char *filename)
         rndr_model_delete(&model);
         return NULL;
     }  
-    model->tc = malloc(sizeof(struct vec2f) * res_vt);
+    model->tc = malloc(sizeof(vec2) * res_vt);
     if (!model->tc) { /* Could not allocate */
         rndr_model_delete(&model);
         return NULL;
     }
-    model->vn = malloc(sizeof(struct vec3f) * res_vn);
+    model->vn = malloc(sizeof(vec3) * res_vn);
     if (!model->vn) { /* Could not allocate */
         rndr_model_delete(&model);
         return NULL;
@@ -87,8 +87,8 @@ rndr_model_create(const char *filename)
             /* Reserve memory if necessary */
             if (model->n_verts == res_verts - 1) {
                 res_verts *= 2;
-                struct vec3f *aux;
-                aux = realloc(model->verts, sizeof(struct vec3f) * res_verts);
+                vec3 *aux;
+                aux = realloc(model->verts, sizeof(vec3) * res_verts);
                 if (!aux) {
                     rndr_model_delete(&model);
                     return NULL;
@@ -98,10 +98,10 @@ rndr_model_create(const char *filename)
             }
 
             /* Insert new vert */
-            struct vec3f *vec = &model->verts[model->n_verts];
-            vec->x = x;
-            vec->y = y;
-            vec->z = z;
+            vec3 *vec = &model->verts[model->n_verts];
+            (*vec)[0] = x;
+            (*vec)[1] = y;
+            (*vec)[2] = z;
             model->n_verts++;
         } else if (strncmp(line, "vt ", 3) == 0) {       /* Tex coords */
             float u, v;
@@ -111,8 +111,8 @@ rndr_model_create(const char *filename)
             /* Reserve memory if necessary */
             if (model->n_tc == res_vt - 1) {
                 res_vt *= 2;
-                struct vec2f *aux;
-                aux = realloc(model->tc, sizeof(struct vec2f) * res_vt);
+                vec2 *aux;
+                aux = realloc(model->tc, sizeof(vec2) * res_vt);
                 if (!aux) {
                     rndr_model_delete(&model);
                     return NULL;
@@ -122,19 +122,19 @@ rndr_model_create(const char *filename)
             }
 
             /* Insert new tex coordinate */
-            struct vec2f *texcoord = &model->tc[model->n_tc];
-            texcoord->x = u; texcoord->y = v;
+            vec2 *texcoord = &model->tc[model->n_tc];
+            (*texcoord)[0] = u; (*texcoord)[1] = v;
             model->n_tc++;
         } else if (strncmp(line, "vn ", 3) == 0) {       /* Normals */
-            struct vec3f vn;
-            if (sscanf(line, "vn %f %f %f", &vn.x, &vn.y, &vn.z) != 3)
+            vec3 vn;
+            if (sscanf(line, "vn %f %f %f", &vn[0], &vn[1], &vn[2]) != 3)
                 continue;
 
             /* Reserve memory if necesary */
             if (model->n_vn == res_vn - 1) {
                 res_vn *= 2;
-                struct vec3f *aux;
-                aux = realloc(model->vn, sizeof(struct vec3f) * res_vn);
+                vec3 *aux;
+                aux = realloc(model->vn, sizeof(vec3) * res_vn);
                 if (!aux) {
                     rndr_model_delete(&model);
                     return NULL;
@@ -144,7 +144,7 @@ rndr_model_create(const char *filename)
             }
 
             /* Insert new normal */
-            memcpy(&model->vn[model->n_vn], &vn, sizeof(struct vec3f));
+            memcpy(&model->vn[model->n_vn], &vn, sizeof(vec3));
             model->n_vn++;
         } else if (strncmp(line, "f ", 2) == 0) {        /* Faces */
             /*TODO - Polygons greater than 3 sides*/
@@ -183,10 +183,10 @@ rndr_model_create(const char *filename)
     }
 
     /* Reallocate for using only the needed space */
-    model->verts = realloc(model->verts, sizeof(struct vec3f) * model->n_verts);
+    model->verts = realloc(model->verts, sizeof(vec3) * model->n_verts);
     model->faces = realloc(model->faces, sizeof(struct face) * model->n_faces);
-    model->tc    = realloc(model->tc, sizeof(struct vec2f) * model->n_tc);
-    model->vn    = realloc(model->vn, sizeof(struct vec3f) * model->n_vn);
+    model->tc    = realloc(model->tc, sizeof(vec2) * model->n_tc);
+    model->vn    = realloc(model->vn, sizeof(vec3) * model->n_vn);
 
     free(line);
     fclose(f);
@@ -225,7 +225,7 @@ rndr_model_nfaces(const struct model *model)
     return model->n_faces;
 }
 
-struct vec3f *
+vec3 *
 rndr_model_vert(const struct model *model, int i)
 {
     if (model && model->verts && i >= 0 && i < model->n_verts) {
@@ -235,7 +235,7 @@ rndr_model_vert(const struct model *model, int i)
     }
 }
 
-struct vec2f *
+vec2 *
 rndr_model_texcoords(const struct model *model, int i)
 { 
     if (model && model->tc && i >= 0 && i < model->n_tc) {
@@ -246,7 +246,7 @@ rndr_model_texcoords(const struct model *model, int i)
 
 }
 
-struct vec3f *
+vec3 *
 rndr_model_normal(const struct model *m, int i)
 {
     if (m && m->tc && i >= 0 && i < m->n_vn) {
@@ -268,7 +268,7 @@ rndr_model_face(const struct model *model, int i)
 }
 
 /* Returns the jth vec of the ith face of the model */
-struct vec3f *
+vec3 *
 rndr_model_face_vec(const struct model *m, int i, int j)
 {
     if (j < 0 || j > 2) return NULL;
@@ -276,13 +276,13 @@ rndr_model_face_vec(const struct model *m, int i, int j)
     struct face *f = rndr_model_face(m, i);
     if (!f) return NULL;
     
-    struct vec3f *v = rndr_model_vert(m, f->verts[j]);
+    vec3 *v = rndr_model_vert(m, f->verts[j]);
 
     return v;       /* If invalid it is already NULL */
 }
 
 /* Returns the jth uv coord of the ith face of the model */
-struct vec2f *
+vec2 *
 rndr_model_face_uv(const struct model *m, int i, int j)
 {
     if (j < 0 || j > 2 || i < 0 || i >= m->n_faces) return NULL;
@@ -290,13 +290,13 @@ rndr_model_face_uv(const struct model *m, int i, int j)
     struct face *f = rndr_model_face(m, i);
     if (!f) return NULL;
 
-    struct vec2f *uv = rndr_model_texcoords(m, f->uv[j]);
+    vec2 *uv = rndr_model_texcoords(m, f->uv[j]);
 
     return uv;       /* If invalid it is already NULL */
 }
 
 /* Returns the jth normal of the ith face of the model */
-struct vec3f *
+vec3 *
 rndr_model_face_vn(const struct model *m, int i, int j)
 {
     if (j < 0 || j > 2 || i < 0 || i >= m->n_faces) return NULL;
@@ -304,7 +304,7 @@ rndr_model_face_vn(const struct model *m, int i, int j)
     struct face *f = rndr_model_face(m, i);
     if (!f) return NULL;
 
-    struct vec3f *vn = rndr_model_normal(m, f->vn[j]);
+    vec3 *vn = rndr_model_normal(m, f->vn[j]);
 
     return vn;      /* If invalid it is already NULL */
 }

@@ -4,6 +4,8 @@
 #include <geometry.h>
 #include <color.h>
 #include <texture.h>
+#include <cglm/vec2.h>
+#include <cglm/vec3.h>
 
 struct framebuffer;
 
@@ -28,8 +30,8 @@ rndr_framebuffer_draw_line(struct framebuffer *fb, struct color *col,
 
 void
 rndr_framebuffer_draw_triangle(struct framebuffer *fb, const gm_triangle *tr, 
-                               struct vec3f **u, struct vec2f **uv, 
-                               struct vec3f **vn, struct texture *tex);
+                               vec3 *u[3], vec2 *uv[3], 
+                               vec3 *vn[3], struct texture *tex);
 
 void
 rndr_framebuffer_clear_color(struct framebuffer *fb, const struct color *col);
