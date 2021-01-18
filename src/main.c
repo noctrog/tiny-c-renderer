@@ -7,17 +7,20 @@
 
 int main(int argc, char *argv[])
 {
-    const int width = 1000;
-    const int height = 1000;
+    const int WIDTH = 1000;
+    const int HEIGHT = 1000;
     const struct color col_back = {.r = 0x28, .g = 0x28, .b = 0x28};
 
-    struct framebuffer* fb = rndr_framebuffer_create(width, height);
+    struct framebuffer* fb = rndr_framebuffer_create(WIDTH, HEIGHT);
     rndr_framebuffer_clear_color(fb, &col_back);
     rndr_framebuffer_clear_z(fb);
-
-    struct model *m = rndr_model_create("media/models/african_head.obj");
-    if (!m) exit(-1);
-    struct texture *tex = rndr_texture_create("media/models/african_head_diffuse.tga");
+    
+    struct model *m = rndr_model_create("media/models/african_head/african_head.obj");
+    if (!m) {
+      printf("ERROR: Couldn't read the model file\n");
+      exit(-1);
+    }
+    struct texture *tex = rndr_texture_create("media/models/african_head/african_head_diffuse.tga");
     if (!tex) {
         printf("Problema al leer la imagen\n");
         exit(-1);
@@ -41,8 +44,8 @@ int main(int argc, char *argv[])
             vn[j] = rndr_model_face_vn(m, i, j);
 
             /* Resize to fill framebuffer */
-            int x = ((*u[j])[0] + 1.0f) * width / 2.0f;
-            int y = ((*u[j])[1] + 1.0f) * height / 2.0f;
+            int x = ((*u[j])[0] + 1.0f) * WIDTH / 2.0f;
+            int y = ((*u[j])[1] + 1.0f) * HEIGHT / 2.0f;
 
             tr[j].x = x;
             tr[j].y = y;

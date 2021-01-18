@@ -62,6 +62,8 @@ rndr_model_create(const char *filename)
     }
 
     FILE *f = fopen(filename, "r");
+    if (!f) return NULL;
+
     char *line = NULL;
     ssize_t linelen = 0;
     size_t linecap = 0;
@@ -216,13 +218,19 @@ rndr_model_delete(struct model **model)
 int
 rndr_model_nvers(const struct model *model)
 {
+  if (model)
     return model->n_verts;
+  else
+    return 0;
 }
 
 int
 rndr_model_nfaces(const struct model *model)
 {
+  if (model)
     return model->n_faces;
+  else
+    return 0;
 }
 
 vec3 *
@@ -267,7 +275,6 @@ rndr_model_face(const struct model *model, int i)
     }
 }
 
-/* Returns the jth vec of the ith face of the model */
 vec3 *
 rndr_model_face_vec(const struct model *m, int i, int j)
 {
@@ -281,7 +288,6 @@ rndr_model_face_vec(const struct model *m, int i, int j)
     return v;       /* If invalid it is already NULL */
 }
 
-/* Returns the jth uv coord of the ith face of the model */
 vec2 *
 rndr_model_face_uv(const struct model *m, int i, int j)
 {
@@ -295,7 +301,6 @@ rndr_model_face_uv(const struct model *m, int i, int j)
     return uv;       /* If invalid it is already NULL */
 }
 
-/* Returns the jth normal of the ith face of the model */
 vec3 *
 rndr_model_face_vn(const struct model *m, int i, int j)
 {

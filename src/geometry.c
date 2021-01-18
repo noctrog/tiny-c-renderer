@@ -56,7 +56,6 @@ rndr_geometry_barycentric_coords(const gm_triangle *tr, const struct vec2i *p, v
     glm_vec3_copy(c, dest);
 }
 
-/*Returns 1 if point is inside the triangle, 0 if not*/
 int
 rndr_geometry_pixel_in_triangle(const gm_triangle *tr, const struct vec2i *p)
 {

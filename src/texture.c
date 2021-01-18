@@ -36,7 +36,6 @@ rndr_texture_delete(struct texture **tex)
     *tex = NULL;
 }
 
-
 struct color *
 rndr_texture_get_color(struct texture *tex, struct vec2i *p)
 {
