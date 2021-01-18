@@ -1,3 +1,8 @@
+/**
+ *   \file geometry.h
+ *   \brief Renderer's geometry related functions
+ */
+
 #ifndef GEOMETRY_H_HGQZ875L
 #define GEOMETRY_H_HGQZ875L
 

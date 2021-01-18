@@ -1,6 +1,7 @@
-/*******************************************************
-*  Model header. Works with Wavefront OBJ 3D objetcs  *
-*******************************************************/
+/**
+ *   \file model.h
+ *   \brief Simple library to load Wavefront OBJ 3D objects
+ */
 
 #ifndef MODEL_H_RBWTLNK5
 #define MODEL_H_RBWTLNK5

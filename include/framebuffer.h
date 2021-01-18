@@ -1,3 +1,9 @@
+/**
+ *   \file framebuffer.h
+ *   \brief Renderer's framebuffer functions.
+ */
+
+
 #ifndef IMAGE_H_P2AJDWBK
 #define IMAGE_H_P2AJDWBK
 

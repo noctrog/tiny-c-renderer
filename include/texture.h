@@ -1,3 +1,8 @@
+/**
+ *   \file texture.h
+ *   \brief Texure loading and simple operations
+ */
+
 #ifndef TEXTURE_H_16JPB9UM
 #define TEXTURE_H_16JPB9UM
 
