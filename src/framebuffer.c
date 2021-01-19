@@ -162,41 +162,34 @@ rndr_framebuffer_draw_triangle(struct framebuffer *fb,
 		rndr_framebuffer_set_pixel_z(fb, z_val, &p);
                 vec3 n; glm_vec3_zero(n);
                 rndr_geometry_triangle_normal(u, n);
-                float intensity = n[2];
 
-                /***********************************************************************************************
-                 *  TODO: Las siguientes dos lineas hacen que los triangulos de los hombros
-                 *  no se rendericen bien. *
-                 ***********************************************************************************************/
-                /* struct vec3 i = {.x = (*vn[0]).z, .y = (*vn[1]).z, .z = (*vn[2]).z}; */
-                /* float intensity = i.x * bc.x + i.y * bc.y + i.z * bc.z; */
-                /* if (intensity > 0.0f) { */
-                    /* Compute texture coordinates */
-                    vec2 tc = {
-                        (*uv[0])[0] * bc[0] + (*uv[1])[0] * bc[1] + (*uv[2])[0] * bc[2],
-                        (*uv[0])[1] * bc[0] + (*uv[1])[1] * bc[1] + (*uv[2])[1] * bc[2]
-                    };
-                    /* Calculate texture pixel */
-                    struct vec2i tci = {
-                        .x = tc[0] * rndr_texture_get_width(tex),
-                        .y = tc[1] * rndr_texture_get_height(tex)
-                    };
-                    /* Retrieve color */
-                    struct color *c = rndr_texture_get_color(tex, &tci);
-                    if (!c) continue;
+                vec3 i = {(*vn[0])[2], (*vn[1])[2], (*vn[2])[2]};
+                float intensity = i[0] * bc[0] + i[1] * bc[1] + i[2] * bc[2];
+		/* TODO: Should check if intensity > 0?? */
+		/* Compute texture coordinates */
+		vec2 tc = {(*uv[0])[0] * bc[0] + (*uv[1])[0] * bc[1] +
+			       (*uv[2])[0] * bc[2],
+			   (*uv[0])[1] * bc[0] + (*uv[1])[1] * bc[1] +
+			       (*uv[2])[1] * bc[2]};
+		/* Calculate texture pixel */
+		struct vec2i tci = {.x = tc[0] * rndr_texture_get_width(tex),
+				    .y = tc[1] * rndr_texture_get_height(tex)};
+		/* Retrieve color */
+		struct color *c = rndr_texture_get_color(tex, &tci);
+		if (!c)
+		  continue;
 
-                    c->r *= fabs(intensity);
-                    c->g *= fabs(intensity);
-                    c->b *= fabs(intensity);
-                    /* c->r = fabs(intensity) * 255; */
-                    /* c->g = fabs(intensity) * 255; */
-                    /* c->b = fabs(intensity) * 255; */
+		c->r *= fabs(intensity);
+		c->g *= fabs(intensity);
+		c->b *= fabs(intensity);
+		/* c->r = fabs(intensity) * 255; */
+		/* c->g = fabs(intensity) * 255; */
+		/* c->b = fabs(intensity) * 255; */
 
-                    rndr_framebuffer_set_pixel_z(fb, z_val, &p);
-                    rndr_framebuffer_set_pixel(fb, c, &p);
-                /* } */
-            }
-        }
+		rndr_framebuffer_set_pixel_z(fb, z_val, &p);
+		rndr_framebuffer_set_pixel(fb, c, &p);
+	    }
+	}
     }
 }
 
