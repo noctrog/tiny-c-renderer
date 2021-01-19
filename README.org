@@ -1,0 +1,5 @@
+* Tiny C Renderer (WIP)
+
+Software renderer written in C. Heavily inspired from https://github.com/ssloy/tinyrenderer.
+
+[[media/lesson-3.png]]
