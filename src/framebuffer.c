@@ -74,7 +74,7 @@ rndr_framebuffer_set_pixel(struct framebuffer *fb, const struct color *col,
 }
 
 void
-rndr_framebuffer_set_pixel_z(struct framebuffer *fb, int zval, const struct vec2i *p)
+rndr_framebuffer_set_pixel_z(struct framebuffer *fb, float zval, const struct vec2i *p)
 {
     if (!fb || !p || p->x < 0 || p->y < 0 || p->x >= fb->x || p->y >= fb->y) return;
 
@@ -150,6 +150,7 @@ rndr_framebuffer_draw_triangle(struct framebuffer *fb,
         vec3 bc; glm_vec3_zero(bc);
         rndr_geometry_barycentric_coords(tr, &p, bc);
 
+	/* Check if current pixel is inside the triangle */
         if (rndr_geometry_pixel_in_triangle(tr, &p)) {
             /* Compute z value */
             float z_val = 0.0f;
@@ -157,7 +158,8 @@ rndr_framebuffer_draw_triangle(struct framebuffer *fb,
             z_val += (*u[1])[2] * bc[1];
             z_val += (*u[2])[2] * bc[2];
 
-            if (rndr_framebuffer_get_pixel_z(fb, &p) > z_val) {
+            if (rndr_framebuffer_get_pixel_z(fb, &p) < z_val) {
+		rndr_framebuffer_set_pixel_z(fb, z_val, &p);
                 vec3 n; glm_vec3_zero(n);
                 rndr_geometry_triangle_normal(u, n);
                 float intensity = n[2];
@@ -168,7 +170,7 @@ rndr_framebuffer_draw_triangle(struct framebuffer *fb,
                  ***********************************************************************************************/
                 /* struct vec3 i = {.x = (*vn[0]).z, .y = (*vn[1]).z, .z = (*vn[2]).z}; */
                 /* float intensity = i.x * bc.x + i.y * bc.y + i.z * bc.z; */
-                if (intensity > 0.0f) {
+                /* if (intensity > 0.0f) { */
                     /* Compute texture coordinates */
                     vec2 tc = {
                         (*uv[0])[0] * bc[0] + (*uv[1])[0] * bc[1] + (*uv[2])[0] * bc[2],
@@ -183,16 +185,16 @@ rndr_framebuffer_draw_triangle(struct framebuffer *fb,
                     struct color *c = rndr_texture_get_color(tex, &tci);
                     if (!c) continue;
 
-                    c->r *= intensity;
-                    c->g *= intensity;
-                    c->b *= intensity;
+                    c->r *= fabs(intensity);
+                    c->g *= fabs(intensity);
+                    c->b *= fabs(intensity);
                     /* c->r = fabs(intensity) * 255; */
                     /* c->g = fabs(intensity) * 255; */
                     /* c->b = fabs(intensity) * 255; */
 
                     rndr_framebuffer_set_pixel_z(fb, z_val, &p);
                     rndr_framebuffer_set_pixel(fb, c, &p);
-                }
+                /* } */
             }
         }
     }
@@ -218,7 +220,7 @@ rndr_framebuffer_clear_z(struct framebuffer *fb)
 
     int num_pixels = fb->x * fb->y, j;
     for (j = 0; j < num_pixels; ++j) {
-        fb->z_buffer[j] = 10.0f;
+        fb->z_buffer[j] = -10.0f;
     }
 }
 

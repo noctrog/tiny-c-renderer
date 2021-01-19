@@ -52,7 +52,7 @@ rndr_framebuffer_set_pixel(struct framebuffer *fb, const struct color *col,
  */
 // TODO zval con float
 void
-rndr_framebuffer_set_pixel_z(struct framebuffer *fb, int zval, const struct vec2i *p);
+rndr_framebuffer_set_pixel_z(struct framebuffer *fb, float zval, const struct vec2i *p);
 
 /**
  *  \brief Retrieve value from zbuffer
