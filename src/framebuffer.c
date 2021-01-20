@@ -59,7 +59,7 @@ rndr_framebuffer_delete(struct framebuffer **fb)
 }
 
 void
-rndr_framebuffer_set_pixel(struct framebuffer *fb, const struct color *col,
+rndr_framebuffer_set_pixel(struct framebuffer *fb, const struct coloru *col,
                                const struct vec2i *p)
 {
     if (!fb || !col || !p) return;
@@ -93,7 +93,7 @@ rndr_framebuffer_get_pixel_z(const struct framebuffer *fb, const struct vec2i *p
 }
 
 void
-rndr_framebuffer_draw_line(struct framebuffer *fb, struct color *col, 
+rndr_framebuffer_draw_line(struct framebuffer *fb, struct coloru *col, 
                            struct vec2i *p0, struct vec2i *p1)
 {
     /*Check pointers*/
@@ -167,15 +167,13 @@ rndr_framebuffer_draw_triangle(struct framebuffer *fb,
                 float intensity = i[0] * bc[0] + i[1] * bc[1] + i[2] * bc[2];
 		/* TODO: Should check if intensity > 0?? */
 		/* Compute texture coordinates */
-		vec2 tc = {(*uv[0])[0] * bc[0] + (*uv[1])[0] * bc[1] +
-			       (*uv[2])[0] * bc[2],
-			   (*uv[0])[1] * bc[0] + (*uv[1])[1] * bc[1] +
-			       (*uv[2])[1] * bc[2]};
+		vec2 tc = {(*uv[0])[0] * bc[0] + (*uv[1])[0] * bc[1] + (*uv[2])[0] * bc[2],
+			   (*uv[0])[1] * bc[0] + (*uv[1])[1] * bc[1] + (*uv[2])[1] * bc[2]};
 		/* Calculate texture pixel */
 		struct vec2i tci = {.x = tc[0] * rndr_texture_get_width(tex),
 				    .y = tc[1] * rndr_texture_get_height(tex)};
 		/* Retrieve color */
-		struct color *c = rndr_texture_get_color(tex, &tci);
+		struct colorf *c = rndr_texture_get_color(tex, &tci);
 		if (!c)
 		  continue;
 
@@ -186,15 +184,21 @@ rndr_framebuffer_draw_triangle(struct framebuffer *fb,
 		/* c->g = fabs(intensity) * 255; */
 		/* c->b = fabs(intensity) * 255; */
 
+		/* Convert to uchar color */
+		struct coloru cu;
+		cu.r = c->r * 255.0f;
+		cu.g = c->g * 255.0f;
+		cu.b = c->b * 255.0f;
+
 		rndr_framebuffer_set_pixel_z(fb, z_val, &p);
-		rndr_framebuffer_set_pixel(fb, c, &p);
+		rndr_framebuffer_set_pixel(fb, &cu, &p);
 	    }
 	}
     }
 }
 
 void
-rndr_framebuffer_clear_color(struct framebuffer *fb, const struct color *col)
+rndr_framebuffer_clear_color(struct framebuffer *fb, const struct coloru *col)
 {
     if (!fb || !col) return;
 

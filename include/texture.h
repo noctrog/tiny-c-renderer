@@ -33,7 +33,7 @@ rndr_texture_delete(struct texture **tex);
  *  \param p: pointer to a vec2i indicating pixel position
  *  \return pointer to the corresponding color
  */
-struct color *
+struct colorf *
 rndr_texture_get_color(struct texture *tex, struct vec2i *p);
 
 /**

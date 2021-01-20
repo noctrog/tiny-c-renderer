@@ -40,7 +40,7 @@ rndr_framebuffer_delete(struct framebuffer **fb);
  *  \return void
  */
 void
-rndr_framebuffer_set_pixel(struct framebuffer *fb, const struct color *col,
+rndr_framebuffer_set_pixel(struct framebuffer *fb, const struct coloru *col,
 			   const struct vec2i *p);
 
 /**
@@ -71,7 +71,7 @@ rndr_framebuffer_get_pixel_z(const struct framebuffer *fb, const struct vec2i *p
  *  \return void
  */
 void
-rndr_framebuffer_draw_line(struct framebuffer *fb, struct color *col, 
+rndr_framebuffer_draw_line(struct framebuffer *fb, struct coloru *col, 
                            struct vec2i *p0, struct vec2i *p1);
 
 /**
@@ -94,7 +94,7 @@ rndr_framebuffer_draw_triangle(struct framebuffer *fb,
  *  \return void
  */
 void
-rndr_framebuffer_clear_color(struct framebuffer *fb, const struct color *col);
+rndr_framebuffer_clear_color(struct framebuffer *fb, const struct coloru *col);
 
 /**
  *  \brief Clear the z buffer
