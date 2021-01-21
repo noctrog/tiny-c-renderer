@@ -62,7 +62,10 @@ rndr_model_create(const char *filename)
     }
 
     FILE *f = fopen(filename, "r");
-    if (!f) return NULL;
+    if (!f) {
+	rndr_model_delete(&model);
+	return NULL; 
+    }
 
     char *line = NULL;
     ssize_t linelen = 0;

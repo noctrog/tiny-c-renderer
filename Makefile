@@ -7,8 +7,8 @@ BIN=bin
 
 CC=cc
 AR=ar
-CFLAGS=-std=c11 -O2 -I$(INCLUDE) -Wall -g
-LFLAGS= -lm
+CFLAGS=-std=c11 -O2 -I$(INCLUDE) -Wall -g -fopenmp
+LFLAGS= -lm -fopenmp
 
 SRC_FILES=$(wildcard $(SRC)/*.c)
 OBJ_FILES=$(addprefix $(OBJ)/,$(notdir $(SRC_FILES:.c=.o)))

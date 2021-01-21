@@ -143,6 +143,7 @@ rndr_framebuffer_draw_triangle(struct framebuffer *fb,
     if (bb.x == -1 || bb.y == -1 || bb.w == -1 || bb.h == -1) return;
 
     int num_pixels = bb.h * bb.w, j;
+    #pragma omp parallel for
     for (j = 0; j < num_pixels; ++j) {
         struct vec2i p = {.x = bb.x + j % bb.w, .y = bb.y + j / bb.w};
 
@@ -159,13 +160,12 @@ rndr_framebuffer_draw_triangle(struct framebuffer *fb,
             z_val += (*u[2])[2] * bc[2];
 
             if (rndr_framebuffer_get_pixel_z(fb, &p) < z_val) {
-		rndr_framebuffer_set_pixel_z(fb, z_val, &p);
-                vec3 n; glm_vec3_zero(n);
-                rndr_geometry_triangle_normal(u, n);
+		/* Calculate normal vector for this pixel */
+                vec3 current_normal = {(*vn[0])[0] * bc[0] + (*vn[1])[0] * bc[1] + (*vn[2])[0] * bc[2],
+		                       (*vn[0])[1] * bc[0] + (*vn[1])[1] * bc[1] + (*vn[2])[1] * bc[2],
+		                       (*vn[0])[2] * bc[0] + (*vn[1])[2] * bc[1] + (*vn[2])[2] * bc[2]};
+		float intensity = current_normal[2];
 
-                vec3 i = {(*vn[0])[2], (*vn[1])[2], (*vn[2])[2]};
-                float intensity = i[0] * bc[0] + i[1] * bc[1] + i[2] * bc[2];
-		/* TODO: Should check if intensity > 0?? */
 		/* Compute texture coordinates */
 		vec2 tc = {(*uv[0])[0] * bc[0] + (*uv[1])[0] * bc[1] + (*uv[2])[0] * bc[2],
 			   (*uv[0])[1] * bc[0] + (*uv[1])[1] * bc[1] + (*uv[2])[1] * bc[2]};
@@ -174,15 +174,11 @@ rndr_framebuffer_draw_triangle(struct framebuffer *fb,
 				    .y = tc[1] * rndr_texture_get_height(tex)};
 		/* Retrieve color */
 		struct colorf *c = rndr_texture_get_color(tex, &tci);
-		if (!c)
-		  continue;
+		if (!c) continue;
 
 		c->r *= fabs(intensity);
 		c->g *= fabs(intensity);
 		c->b *= fabs(intensity);
-		/* c->r = fabs(intensity) * 255; */
-		/* c->g = fabs(intensity) * 255; */
-		/* c->b = fabs(intensity) * 255; */
 
 		/* Convert to uchar color */
 		struct coloru cu;
@@ -190,7 +186,9 @@ rndr_framebuffer_draw_triangle(struct framebuffer *fb,
 		cu.g = c->g * 255.0f;
 		cu.b = c->b * 255.0f;
 
+		/* Update Z buffer */
 		rndr_framebuffer_set_pixel_z(fb, z_val, &p);
+		/* Update color buffer */
 		rndr_framebuffer_set_pixel(fb, &cu, &p);
 	    }
 	}

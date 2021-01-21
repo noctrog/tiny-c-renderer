@@ -9,7 +9,7 @@ int main(int argc, char *argv[])
 {
     const int WIDTH = 1000;
     const int HEIGHT = 1000;
-    const struct color col_back = {.r = 0x28, .g = 0x28, .b = 0x28};
+    const struct coloru col_back = {.r = 0x28, .g = 0x28, .b = 0x28};
 
     struct framebuffer* fb = rndr_framebuffer_create(WIDTH, HEIGHT);
     rndr_framebuffer_clear_color(fb, &col_back);
