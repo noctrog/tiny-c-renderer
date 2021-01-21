@@ -29,7 +29,7 @@ int main(int argc, char *argv[])
     int i, nfaces;
     nfaces = rndr_model_nfaces(m);
     for (i = 0; i < nfaces; ++i) {
-        gm_triangle tr;             /* Current triangle, screen space */
+        gm_triangle2i tr;             /* Current triangle, screen space */
         vec3 *u[3];                  /* Triangle 3D vertices */
         vec2 *uv[3];                 /* Texture coordinates */
         vec3 *vn[3];                 /* Normals */

@@ -6,12 +6,6 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
-struct framebuffer {
-    int x, y;
-    unsigned char* color;
-    float *z_buffer;
-};
-
 static inline void 
 int_swap(int *a, int *b)
 {
@@ -143,6 +137,7 @@ rndr_framebuffer_draw_triangle(struct framebuffer *fb,
     if (bb.x == -1 || bb.y == -1 || bb.w == -1 || bb.h == -1) return;
 
     int num_pixels = bb.h * bb.w, j;
+
     #pragma omp parallel for
     for (j = 0; j < num_pixels; ++j) {
         struct vec2i p = {.x = bb.x + j % bb.w, .y = bb.y + j / bb.w};
