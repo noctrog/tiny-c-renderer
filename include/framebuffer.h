@@ -81,7 +81,7 @@ rndr_framebuffer_draw_line(struct framebuffer *fb, struct coloru *col,
  */
 void
 rndr_framebuffer_draw_triangle(struct framebuffer *fb, 
-                               const gm_triangle *tr, 
+                               const gm_triangle2i *tr, 
                                vec3 *u[3],
                                vec2 *uv[3],
                                vec3 *vn[3],

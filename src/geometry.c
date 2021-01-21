@@ -5,7 +5,7 @@
 #include <cglm/vec3.h>
 
 struct bbox 
-rndr_geometry_triangle_bounding_box(const gm_triangle* tr)
+rndr_geometry_triangle_bounding_box(const gm_triangle2i* tr)
 {
     struct bbox bb = {.x = -1, .y = -1, .w = -1, .h = -1};
 
@@ -30,7 +30,7 @@ rndr_geometry_triangle_bounding_box(const gm_triangle* tr)
 }
 
 void
-rndr_geometry_barycentric_coords(const gm_triangle *tr, const struct vec2i *p, vec3 dest)
+rndr_geometry_barycentric_coords(const gm_triangle2i *tr, const struct vec2i *p, vec3 dest)
 {
     vec3 c = {-1.0f, -1.0f, -1.0f};
     if (!tr || !p) {
@@ -57,7 +57,7 @@ rndr_geometry_barycentric_coords(const gm_triangle *tr, const struct vec2i *p, v
 }
 
 int
-rndr_geometry_pixel_in_triangle(const gm_triangle *tr, const struct vec2i *p)
+rndr_geometry_pixel_in_triangle(const gm_triangle2i *tr, const struct vec2i *p)
 {
     if (!tr || !p) return 0;
 

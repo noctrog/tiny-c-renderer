@@ -24,7 +24,7 @@ struct vec4i {
     int x, y, z, w;
 };
 
-typedef struct vec2i gm_triangle[3];
+typedef struct vec2i gm_triangle2i[3];
 
 /*Bounding box*/
 struct bbox {
@@ -37,7 +37,7 @@ struct bbox {
  *  \return bounding box
  */
 struct bbox 
-rndr_geometry_triangle_bounding_box(const gm_triangle* tr);
+rndr_geometry_triangle_bounding_box(const gm_triangle2i* tr);
 
 /**
  *  \brief Compute barycentric coordinates
@@ -50,7 +50,7 @@ rndr_geometry_triangle_bounding_box(const gm_triangle* tr);
  *  \return void
  */
 void
-rndr_geometry_barycentric_coords(const gm_triangle *tr, const struct vec2i *p, vec3 dest);
+rndr_geometry_barycentric_coords(const gm_triangle2i *tr, const struct vec2i *p, vec3 dest);
 
 /*Returns 1 if point is inside the triangle, 0 if not*/
 /**
@@ -60,7 +60,7 @@ rndr_geometry_barycentric_coords(const gm_triangle *tr, const struct vec2i *p, v
  *  \return integer
  */
 int
-rndr_geometry_pixel_in_triangle(const gm_triangle *tr, const struct vec2i *p);
+rndr_geometry_pixel_in_triangle(const gm_triangle2i *tr, const struct vec2i *p);
 
 /**
  *  \brief Computes the normal vector of a triangle in 3D space
