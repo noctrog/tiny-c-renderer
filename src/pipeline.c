@@ -1,32 +1,183 @@
 #include <string.h>
 #include <pipeline.h>
 #include <framebuffer.h>
+#include <cglm/cglm.h>
+
+struct pipeline_data {
+    /* Input data */
+    size_t n_triangles;         /* Stores the total number of triangles to draw */
+    triangle_vertices u;        /* 3D vertices of triangles */
+    triangle_tex_coords uv;     /* Texture coordinates of triangles */
+    triangle_normals vn;        /* Normals of triangles */
+    tex_array textures;         /* 2D Textures */
+
+    mat4 mvp;     /* Model-View-Projection Matrix */
+
+    struct framebuffer *fb;     /* Current framebuffer to draw on */
+
+    /* Intermediate auxiliar data data */
+    triangle_vertices u_aux;
+    triangle_normals vn_aux;
+};
+
+/* --- Private functions declaration ---  */
+/**
+ *  \brief Allocate memory for auxiliary memory for the pipeline's execution
+ *
+ *  This function should only be used by the library itself.
+ *
+ *  \param data: Pipeline data structure 
+ *  \return void
+ */
+static void
+rndr_pipeline_data_create_temp(struct pipeline_data *data);
+/**
+ *  \brief Free temporary memory used for the pipeline's execution
+ *
+ *  This functions should only be used by the library itself.
+ *
+ *  \param data: Pipeline data structure
+ *  \return void
+ */
+static void
+rndr_pipeline_data_free_temp(struct pipeline_data *data);    
+
+/* --- Public functions --- */
+void
+rndr_pipeline_data_set_n_faces(struct pipeline_data *data, size_t n_faces)
+{
+    if (data)
+	data->n_triangles = n_faces;
+}
+
+void
+rndr_pipeline_data_set_vertices(struct pipeline_data *data, triangle_vertices verts)
+{
+    if (data && verts)
+	data->u = verts;
+}
+
+void
+rndr_pipeline_data_set_tex_coords(struct pipeline_data *data, triangle_tex_coords tc)
+{
+    if (data && tc)
+	data->uv = tc;
+}
+
+void
+rndr_pipeline_data_set_normals(struct pipeline_data *data, triangle_normals n)
+{
+    if (data && n)
+	data->vn = n;
+}
+
+
+void
+rndr_pipeline_data_set_texture(struct pipeline_data *data, struct texture *t, size_t n)
+{
+    if (data && t && n < N_MAX_TEXTURES)
+	data->textures[n] = t;
+}
+
+
+void
+rndr_pipeline_data_set_mvp(struct pipeline_data *data, mat4 mvp)
+{
+    if (data && mvp)
+	glm_mat4_copy(mvp, data->mvp);
+}
 
 enum PipelineError
-rndr_pipeline_draw_triangles(struct framebuffer *fb,
-			     const struct pipeline_data *data,
+rndr_pipeline_data_set_fb(struct pipeline_data *data, struct framebuffer *fb)
+{
+    if (!data || !fb) return PIPELINE_INVALID_FB;
+
+    data->fb = fb;
+    return PIPELINE_OK;
+}
+
+enum PipelineError
+rndr_pipeline_data_get_n_faces(struct pipeline_data *data, size_t *n_faces)
+{
+    if (!data || !n_faces) return PIPELINE_INVALID_DATA;
+
+    *n_faces = data->n_triangles;
+    return PIPELINE_OK;
+}
+
+enum PipelineError
+rndr_pipeline_data_get_mvp(struct pipeline_data *data, mat4 mvp)
+{
+    if (!data) return PIPELINE_INVALID_DATA;
+
+    mvp = data->mvp;
+    return PIPELINE_OK;
+}
+
+enum PipelineError
+rndr_pipeline_data_get_texture(struct pipeline_data *data, size_t slot,
+			       struct texture **tex)
+{
+    if (!data) return PIPELINE_INVALID_DATA;
+    if (slot >= N_MAX_TEXTURES) return PIPELINE_INVALID_RANGE;
+
+    *tex = data->textures[slot];
+    return PIPELINE_OK;
+}
+
+enum PipelineError
+rndr_pipeline_draw_triangles(struct pipeline_data *data,
 			     vertex_shader vs,
 			     fragment_shader fs)
 {
-    /* Create a copy of all triangle vertices, since their positions
-     * will be modified by the vertex shader */
-    triangle_vertices new_u;
-    *new_u = calloc(data->n_triangles, sizeof(vec3));
-    memcpy(*new_u, data->u, sizeof(vec3) * data->n_triangles);
+    /* Prepare auxiliar memory */
+    rndr_pipeline_data_create_temp(data);
 
     enum PipelineError err = PIPELINE_OK;
     /* Run vertex shader */
-    if ((err = vs(new_u, data->mvp)) != PIPELINE_OK) {
+    if ((err = vs(data)) != PIPELINE_OK) {
 	/* TODO error handling */
 	return err;
     }
 
     /* Run fragment shader */
-    if ((err = fs(fb, new_u, data->uv, data->vn, data->textures)) != PIPELINE_OK) {
+    if ((err = fs(data)) != PIPELINE_OK) {
 	/* TODO error handling */
 	return err;
     }
 
+    /* Clear temporary memory */
+    rndr_pipeline_data_free_temp(data);
+
     /* Everything executed correctly */
     return err;
+}
+
+/* --- Private functions --- */
+static void
+rndr_pipeline_data_create_temp(struct pipeline_data *data)
+{
+    /* Check if pointers are valid */
+    if (!data || !data->u || !data->vn)
+	return;
+
+    /* Free memory if not freed previously */
+    rndr_pipeline_data_free_temp(data);
+
+    /* Allocate memory for vertices */
+    data->u_aux = calloc(data->n_triangles, sizeof(vec3));
+    /* Allocate memory for normals */
+    data->vn_aux = calloc(data->n_triangles, sizeof(vec3));
+}
+
+static void
+rndr_pipeline_data_free_temp(struct pipeline_data *data)
+{
+    /* Check if pointers are valid */
+    if (!data || !data->u || !data->vn)
+	return;
+
+    /* Free memory if not freed previously */
+    if (data->u_aux)  free(data->u_aux);
+    if (data->vn_aux) free(data->vn_aux);
 }

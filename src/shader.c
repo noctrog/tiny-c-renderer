@@ -1,18 +1,25 @@
 #include "pipeline.h"
 #include <shader.h>
-#include <framebuffer.h>
 
 enum PipelineError
-vertex_shader_default(triangle_vertices u,
-		      const mat4 mvp)
+vertex_shader_default(struct pipeline_data *data)
 {
+    if (!data) return PIPELINE_INVALID_DATA;
 
-  return 0;
+    size_t i, n_faces;
+    rndr_pipeline_data_get_n_faces(data, &n_faces);
+
+    /* For each triangle in mesh */
+    for (i = 0; i < n_faces; ++i) {
+	
+    }
+
+    return PIPELINE_OK;
 }
 
 enum PipelineError
-fragment_shader_default(struct framebuffer *fb,
-			triangle_vertices u,
-			const triangle_tex_coords uv,
-			const triangle_normals vn,
-			const tex_array textures);
+fragment_shader_default(struct pipeline_data *data)
+{
+  
+    return PIPELINE_OK;
+}

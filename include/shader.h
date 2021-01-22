@@ -11,14 +11,9 @@
 struct framebuffer;
 
 enum PipelineError
-vertex_shader_default(triangle_vertices u,
-		      const mat4 mvp);
+vertex_shader_default(struct pipeline_data *data);
 
 enum PipelineError
-fragment_shader_default(struct framebuffer *fb,
-			triangle_vertices u,
-			const triangle_tex_coords uv,
-			const triangle_normals vn,
-			const tex_array textures);
+fragment_shader_default(struct pipeline_data *data);
 
 #endif /* SHADER_H */
