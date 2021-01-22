@@ -13,11 +13,7 @@
 #include <cglm/vec2.h>
 #include <cglm/vec3.h>
 
-struct framebuffer {
-    int x, y;
-    unsigned char* color;
-    float *z_buffer;
-};
+struct framebuffer;
 
 /**
  *  \brief Creates and allocates memory for a framebuffer

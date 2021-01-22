@@ -6,6 +6,12 @@
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb_image_write.h>
 
+struct framebuffer {
+    int x, y;
+    unsigned char* color;
+    float *z_buffer;
+};
+
 static inline void 
 int_swap(int *a, int *b)
 {
