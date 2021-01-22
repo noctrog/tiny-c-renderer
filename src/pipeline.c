@@ -6,9 +6,12 @@
 struct pipeline_data {
     /* Input data */
     size_t n_triangles;         /* Stores the total number of triangles to draw */
+
     triangle_vertices u;        /* 3D vertices of triangles */
     triangle_tex_coords uv;     /* Texture coordinates of triangles */
     triangle_normals vn;        /* Normals of triangles */
+    size_t n_verts;             /* Number of vertices */
+
     tex_array textures;         /* 2D Textures */
 
     mat4 mvp;     /* Model-View-Projection Matrix */
@@ -43,48 +46,63 @@ static void
 rndr_pipeline_data_free_temp(struct pipeline_data *data);    
 
 /* --- Public functions --- */
-void
+enum PipelineError
 rndr_pipeline_data_set_n_faces(struct pipeline_data *data, size_t n_faces)
 {
-    if (data)
-	data->n_triangles = n_faces;
+    if (!data) return PIPELINE_INVALID_DATA;
+
+    data->n_triangles = n_faces;
+    return PIPELINE_OK;
 }
 
-void
-rndr_pipeline_data_set_vertices(struct pipeline_data *data, triangle_vertices verts)
+enum PipelineError
+rndr_pipeline_data_set_vertices(struct pipeline_data *data, triangle_vertices verts,
+				size_t n_verts)
 {
-    if (data && verts)
-	data->u = verts;
+    if (!data || !verts) return PIPELINE_INVALID_DATA;
+
+    data->u = verts;
+    data->n_verts = n_verts;
+
+    return PIPELINE_OK;
 }
 
-void
+enum PipelineError
 rndr_pipeline_data_set_tex_coords(struct pipeline_data *data, triangle_tex_coords tc)
 {
-    if (data && tc)
-	data->uv = tc;
+    if (!data || !tc) return PIPELINE_INVALID_DATA;
+
+    data->uv = tc;
+    return PIPELINE_OK;
 }
 
-void
+enum PipelineError
 rndr_pipeline_data_set_normals(struct pipeline_data *data, triangle_normals n)
 {
-    if (data && n)
-	data->vn = n;
+    if (!data || !n) return PIPELINE_INVALID_DATA;
+
+    data->vn = n;
+    return PIPELINE_OK;
 }
 
 
-void
+enum PipelineError
 rndr_pipeline_data_set_texture(struct pipeline_data *data, struct texture *t, size_t n)
 {
-    if (data && t && n < N_MAX_TEXTURES)
-	data->textures[n] = t;
+    if (!data || !t) return PIPELINE_INVALID_DATA;
+    if (n >= N_MAX_TEXTURES) return PIPELINE_INVALID_RANGE;
+
+    data->textures[n] = t;
+    return PIPELINE_OK;
 }
 
-
-void
+enum PipelineError
 rndr_pipeline_data_set_mvp(struct pipeline_data *data, mat4 mvp)
 {
-    if (data && mvp)
-	glm_mat4_copy(mvp, data->mvp);
+    if (!data || !mvp) return PIPELINE_INVALID_DATA;
+
+    glm_mat4_copy(mvp, data->mvp);
+    return PIPELINE_OK;
 }
 
 enum PipelineError
@@ -122,6 +140,15 @@ rndr_pipeline_data_get_texture(struct pipeline_data *data, size_t slot,
     if (slot >= N_MAX_TEXTURES) return PIPELINE_INVALID_RANGE;
 
     *tex = data->textures[slot];
+    return PIPELINE_OK;
+}
+
+enum PipelineError
+rndr_pipeline_data_get_n_verts(struct pipeline_data *data, size_t *n_verts)
+{
+    if (!data || !n_verts) return PIPELINE_INVALID_DATA;
+
+    *n_verts = data->n_verts;
     return PIPELINE_OK;
 }
 
@@ -165,9 +192,9 @@ rndr_pipeline_data_create_temp(struct pipeline_data *data)
     rndr_pipeline_data_free_temp(data);
 
     /* Allocate memory for vertices */
-    data->u_aux = calloc(data->n_triangles, sizeof(vec3));
+    data->u_aux = calloc(data->n_verts, sizeof(vec3));
     /* Allocate memory for normals */
-    data->vn_aux = calloc(data->n_triangles, sizeof(vec3));
+    data->vn_aux = calloc(data->n_verts, sizeof(vec3));
 }
 
 static void

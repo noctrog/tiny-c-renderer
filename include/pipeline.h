@@ -44,7 +44,7 @@ typedef enum PipelineError (*fragment_shader)(struct pipeline_data *data);
  *  \param n_faces: Number of faces to draw
  *  \return void
  */
-void
+enum PipelineError
 rndr_pipeline_data_set_n_faces(struct pipeline_data *data, size_t n_faces);
 
 /**
@@ -56,8 +56,9 @@ rndr_pipeline_data_set_n_faces(struct pipeline_data *data, size_t n_faces);
  *  \param verts: Pointer to vector of verts.
  *  \return void
  */
-void
-rndr_pipeline_data_set_vertices(struct pipeline_data *data, triangle_vertices verts);
+enum PipelineError
+rndr_pipeline_data_set_vertices(struct pipeline_data *data, triangle_vertices verts,
+				size_t n_vers);
 
 /**
  *  \brief Sets internal pipeline_data tex coordinates pointer to tc.
@@ -68,7 +69,7 @@ rndr_pipeline_data_set_vertices(struct pipeline_data *data, triangle_vertices ve
  *  \param verts: Pointer to vector of tex coordinates.
  *  \return void
  */
-void
+enum PipelineError
 rndr_pipeline_data_set_tex_coords(struct pipeline_data *data, triangle_tex_coords tc);
 
 /**
@@ -80,7 +81,7 @@ rndr_pipeline_data_set_tex_coords(struct pipeline_data *data, triangle_tex_coord
  *  \param verts: Pointer to vector of normals.
  *  \return void
  */
-void
+enum PipelineError
 rndr_pipeline_data_set_normals(struct pipeline_data *data, triangle_normals n);
 
 /**
@@ -93,7 +94,7 @@ rndr_pipeline_data_set_normals(struct pipeline_data *data, triangle_normals n);
  *  \param n: texture slot.
  *  \return void
  */
-void
+enum PipelineError
 rndr_pipeline_data_set_texture(struct pipeline_data *data, struct texture *t, size_t n);
 
 /**
@@ -102,7 +103,7 @@ rndr_pipeline_data_set_texture(struct pipeline_data *data, struct texture *t, si
  *  \param mvp: MVP matrix.
  *  \return void
  */
-void
+enum PipelineError
 rndr_pipeline_data_set_mvp(struct pipeline_data *data, mat4 mvp);
 
 /**
@@ -145,6 +146,15 @@ rndr_pipeline_data_get_mvp(struct pipeline_data *data, mat4 mvp);
 enum PipelineError
 rndr_pipeline_data_get_texture(struct pipeline_data *data, size_t slot,
 			       struct texture **tex);
+
+/**
+ *  \brief Returns the number of vertices of the vertices arrays
+ *  \param data: pointer to Pipeline data structure.
+ *  \param n_verts: pointer to the size_t to contain the number of vertices.
+ *  \return PIPELINE_INVALID_DATA if data is not properly initialized. PIPELINE_OK if execution completed succesfully.
+ */
+enum PipelineError
+rndr_pipeline_data_get_n_verts(struct pipeline_data *data, size_t *n_verts);
 
 enum PipelineError
 rndr_pipeline_draw_triangles(struct pipeline_data *data,
