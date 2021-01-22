@@ -13,7 +13,7 @@ LFLAGS= -lm -fopenmp
 SRC_FILES=$(wildcard $(SRC)/*.c)
 OBJ_FILES=$(addprefix $(OBJ)/,$(notdir $(SRC_FILES:.c=.o)))
 
-CGLM_SRC=$(wildcard cglm/*.c)
+CGLM_SRC=$(wildcard third_party/cglm/*.c)
 CGLM_OBJ=$(notdir $(CGLM_SRC:.c=.o))
 
 $(BIN)/$(PROJECT): $(OBJ_FILES) $(OBJ)/cglm.a
